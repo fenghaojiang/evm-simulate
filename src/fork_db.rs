@@ -11,7 +11,7 @@ use revm::{
     Database, DatabaseRef,
 };
 
-use crate::{MiniRpcClient};
+use crate::MiniRpcClient;
 
 pub struct ForkDB {
     rpc_client: MiniRpcClient,

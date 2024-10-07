@@ -16,5 +16,9 @@ ureq = {version = "2.10.1", features = ["gzip", "json"]}
 serde_json = "1.0.128"
 eyre = "0.6.12"
 serde = "1.0.210"
-alloy = { version = "0.4.2",features = ["full", "rpc-client"] }
-revm = {version = "14.0.3"}
+alloy = { version = "0.3.6",features = ["full"] }
+revm = {version = "14.0.3", features = ["alloydb"]}
+cacache = { version = "13.0.0", default-features = false, features = [
+  "tokio-runtime",
+  "mmap",
+] }

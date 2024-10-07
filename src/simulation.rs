@@ -1,11 +1,14 @@
-
-
 use alloy::rpc::types::Transaction;
-use revm::{db::CacheDB, primitives::{Bytes, EVMResult, ExecutionResult, Log, Output, SuccessReason, TransactTo, TxEnv, U256}, Database, Evm};
+use revm::{
+    db::CacheDB,
+    primitives::{
+        Bytes, EVMResult, ExecutionResult, Log, Output, SuccessReason, TransactTo, TxEnv, U256,
+    },
+    Database, Evm,
+};
 
 use crate::ForkDB;
 use tracing::{error, info, warn};
-
 
 pub fn tx_env_to_simulate(tx: Transaction) -> TxEnv {
     let mut tx_env = TxEnv::default();
@@ -102,7 +105,6 @@ impl<'a> Simulation<'a, (), CacheDB<ForkDB>> {
     }
 }
 
-
 #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn test_on_simulation() -> eyre::Result<()> {
     use alloy::primitives::utils::parse_units;
@@ -110,16 +112,13 @@ async fn test_on_simulation() -> eyre::Result<()> {
     use alloy::sol;
     use revm::primitives::{Address, TransactTo, U256};
     use std::str::FromStr;
-    use tracing::Level;
-    use tracing_subscriber::filter;
+    use tracing::level_filters::LevelFilter;
     use tracing_subscriber::layer::SubscriberExt;
     use tracing_subscriber::util::SubscriberInitExt;
 
-    let filter = filter::Targets::new().with_target("core", Level::INFO);
-
     tracing_subscriber::registry()
         .with(tracing_subscriber::fmt::layer())
-        .with(filter)
+        .with(LevelFilter::INFO)
         .init();
 
     sol! {
@@ -151,9 +150,7 @@ async fn test_on_simulation() -> eyre::Result<()> {
 
     let provider = ProviderBuilder::new()
         .with_recommended_fillers()
-        .on_builtin(
-            "https://rpc.ankr.com/eth",
-        )
+        .on_builtin("https://rpc.ankr.com/eth")
         .await?;
     let eigenlayer_contract = Eigenlayer::new(
         "0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A"
@@ -162,17 +159,13 @@ async fn test_on_simulation() -> eyre::Result<()> {
         provider,
     );
     let call = eigenlayer_contract.queueWithdrawals(params);
-    let call = call.gas(105818u64);
+    let call = call.gas(105818u128);
 
     // println!("{:}", call.calldata());
     let gas_price: U256 = parse_units("7", "gwei").unwrap().into();
     let call = call.gas_price(gas_price.try_into()?);
 
-    let ethers_db = ForkDB::new_as_cache_db(
-        "https://rpc.ankr.com/eth"
-            .to_string(),
-        19737667u64,
-    );
+    let ethers_db = ForkDB::new_as_cache_db("https://rpc.ankr.com/eth".to_string(), 19737667u64);
 
     let mut tx = TxEnv::default();
     tx.caller = withdrawer;
