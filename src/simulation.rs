@@ -1,9 +1,7 @@
 use alloy::rpc::types::Transaction;
 use revm::{
     db::CacheDB,
-    primitives::{
-        Bytes, EVMResult, ExecutionResult, Log, Output, SuccessReason, TransactTo, TxEnv, U256,
-    },
+    primitives::{EVMResult, ExecutionResult, Log, Output, SuccessReason, TransactTo, TxEnv, U256},
     Database, Evm,
 };
 
@@ -11,7 +9,11 @@ use crate::ForkDB;
 use tracing::{error, info, warn};
 
 pub fn tx_env_to_simulate(tx: Transaction) -> TxEnv {
-    let mut tx_env = TxEnv::default();
+    let mut tx_env = TxEnv {
+        caller: tx.from,
+        gas_limit: tx.gas as u64,
+        ..Default::default()
+    };
     tx_env.caller = tx.from;
     tx_env.gas_limit = tx.gas as u64;
 
@@ -32,7 +34,7 @@ pub fn tx_env_to_simulate(tx: Transaction) -> TxEnv {
     }
 
     tx_env.value = tx.value;
-    tx_env.data = Bytes::from(tx.input);
+    tx_env.data = tx.input;
     tx_env.chain_id = tx.chain_id;
     tx_env.nonce = Some(tx.nonce);
 
